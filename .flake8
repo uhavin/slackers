@@ -1,0 +1,13 @@
+[flake8]
+exclude=
+  .tox
+  __pycache__
+  .pytest_cache
+  venv/
+  env/
+  _sandbox/
+  .eggs/
+  redis_shelve.egg-info/
+max-line-length = 88
+select = C,E,F,W,B,B950
+ignore = E203,E501,W503,F811
