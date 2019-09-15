@@ -13,6 +13,8 @@ setup(
         "fastapi",
         "pyee>=6,<7",
         "python-multipart>=0.0.5",
+        "requests",
+        "uvicorn",
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",

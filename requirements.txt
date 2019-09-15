@@ -2,3 +2,5 @@ environs
 fastapi
 pyee
 python-multipart
+requests
+uvicorn
