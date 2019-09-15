@@ -12,7 +12,7 @@ from starlette.responses import Response
 
 from slacken.hooks import actions, commands, emit, events
 from slacken.verification import verify_signature
-from slacken.models.slack import SlackAction, SlackChallenge, SlackEnvelope
+from slacken.models import SlackAction, SlackChallenge, SlackEnvelope
 
 env = Env()
 env.read_env()
