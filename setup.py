@@ -16,10 +16,10 @@ setup(
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    name="slacken",
-    packages=["slacken"],
+    name="slackers",
+    packages=["slackers"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov", "pytest-mock"],
-    url="https://github.com/uhavin/slacken",
+    url="https://github.com/uhavin/slackers",
     version="0.0.0",
 )

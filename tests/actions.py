@@ -5,7 +5,7 @@ import pytest
 from starlette.status import HTTP_200_OK
 from starlette.testclient import TestClient
 
-from slacken.hooks import actions
+from slackers.hooks import actions
 
 
 @pytest.mark.usefixtures("pass_header_verification")

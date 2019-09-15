@@ -4,7 +4,7 @@ import pytest
 
 from starlette.testclient import TestClient
 
-from slacken.server import api
+from slackers.server import api
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def client():
 
 @pytest.fixture
 def pass_header_verification(mocker):
-    hmac = mocker.patch("slacken.verification.hmac")
+    hmac = mocker.patch("slackers.verification.hmac")
     hmac.compare_digest.return_value = True
 
 

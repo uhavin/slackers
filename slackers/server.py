@@ -10,9 +10,9 @@ from starlette.status import HTTP_200_OK
 from starlette.requests import Request
 from starlette.responses import Response
 
-from slacken.hooks import actions, commands, emit, events
-from slacken.verification import verify_signature
-from slacken.models import SlackAction, SlackChallenge, SlackEnvelope
+from slackers.hooks import actions, commands, emit, events
+from slackers.models import SlackAction, SlackChallenge, SlackEnvelope
+from slackers.verification import verify_signature
 
 env = Env()
 env.read_env()
