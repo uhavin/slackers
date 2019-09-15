@@ -2,4 +2,3 @@ environs
 fastapi
 pyee
 python-multipart
-uvicorn
