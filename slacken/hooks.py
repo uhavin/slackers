@@ -3,14 +3,22 @@ import logging
 
 from pyee import BaseEventEmitter
 
-events = BaseEventEmitter()
-actions = BaseEventEmitter()
-commands = BaseEventEmitter()
+
+class NamedEventEmitter(BaseEventEmitter):
+    def __init__(self, name, *args, **kwargs):
+        self.name = name
+        return BaseEventEmitter.__init__(self, *args, **kwargs)
+
+
+events = NamedEventEmitter(name="events")
+actions = NamedEventEmitter(name="actions")
+commands = NamedEventEmitter(name="commands")
 
 
 def emit(emitter, event, payload):
-    logging.getLogger(__name__).debug(f"emitting event: {event}")
-    logging.getLogger(__name__).debug(payload)
+    log = logging.getLogger(__name__)
+    log.info(f"Emitting '{event}' using emitter '{emitter.name}'")
+    log.debug(payload)
 
     async def _emit_async(emitter, event, payload):
         emitter.emit(event, payload)

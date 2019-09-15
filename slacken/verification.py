@@ -3,7 +3,7 @@ import logging
 
 from hashlib import sha256
 
-from fastapi import Form, Header
+from fastapi import Header
 from environs import Env
 from starlette.status import HTTP_403_FORBIDDEN
 from starlette.requests import Request

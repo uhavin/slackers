@@ -49,7 +49,6 @@ async def post_actions(request: Request):
 async def post_commands(request: Request):
     form = await request.form()
     command = form["command"]
-    log.debug(form.__dict__)
     emit(commands, command.lstrip("/"), jsonable_encoder(form))
 
     return Response()
