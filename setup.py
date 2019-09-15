@@ -8,6 +8,12 @@ setup(
     author_email="niels@huijs.net",
     classifier=["Intended Audience :: Developers"],
     descripion="Slack interactions web server.",
+    install_requires=[
+        "environs>=5.2.1,<6",
+        "fastapi",
+        "pyee>=6,<7",
+        "python-multipart>=0.0.5",
+    ],
     long_description=long_description,
     long_description_content_type="text/markdown",
     name="slacken",
