@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 setup(
     author="Niels van Huijstee",
     author_email="niels@huijs.net",
-    classifier=["Intended Audience :: Developers"],
-    descripion="Slack interactions web server.",
+    classifiers=["Intended Audience :: Developers"],
+    description="Slack interactions web server.",
     install_requires=[
         "environs>=5.2.1,<6",
         "fastapi",
