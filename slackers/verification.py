@@ -38,9 +38,7 @@ async def verify_signature(
 
 
 def check_timeout(x_slack_request_timestamp: str = Header(...)):
-    timeout = env.int(
-        "SLACK_REQUEST_TIMEOUT_SECONDS", default=5 * 60
-    )
+    timeout = env.int("SLACK_REQUEST_TIMEOUT_SECONDS", default=5 * 60)
     request_timeout_time = int(x_slack_request_timestamp) + timeout
     current_time = math.ceil(time.time())
 
