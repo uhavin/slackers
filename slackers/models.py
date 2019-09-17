@@ -31,3 +31,14 @@ class SlackAction(SlackBase):
     message: dict = None
     channel: dict = None
     team: dict = None
+
+
+class SlackCommand(SlackBase):
+    user_id: str
+    command: str
+    response_url: str
+    trigger_id: str
+    user_id: str
+    user_name: str
+    team_id: str
+    channel_id: str

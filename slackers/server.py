@@ -11,7 +11,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from slackers.hooks import actions, commands, emit, events
-from slackers.models import SlackAction, SlackChallenge, SlackEnvelope
+from slackers.models import SlackAction, SlackChallenge, SlackCommand, SlackEnvelope
 from slackers.verification import verify_signature
 
 env = Env()
@@ -48,7 +48,7 @@ async def post_actions(request: Request):
 )
 async def post_commands(request: Request):
     form = await request.form()
-    command = form["command"]
-    emit(commands, command.lstrip("/"), jsonable_encoder(form))
+    command = SlackCommand(**form)
+    emit(commands, command.command.lstrip("/"), jsonable_encoder(command))
 
     return Response()
