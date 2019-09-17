@@ -53,6 +53,7 @@ def headers_should_be_verified(client: TestClient, mocker):
     response = client.post("/events", json=challenge, headers=valid_headers)
     assert HTTP_200_OK == response.status_code
 
+
 def timestamp_should_not_exceed_timeout(client: TestClient, mocker):
     timestamp_jan_1_2019_noon = 1546340400
     time = mocker.patch("slackers.verification.time")
