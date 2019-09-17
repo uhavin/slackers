@@ -1,17 +1,20 @@
 import os
-import math
 import time
 import itertools
 
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
-from starlette.testclient import TestClient
-
 import pytest
+
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_403_FORBIDDEN,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+)
+from starlette.testclient import TestClient
 
 paths = ("/events", "/actions", "/commands")
 incomplete_headers = (
     {},
-    {"X-Slack-Request-Timestamp": "123"},
+    {"X-Slack-Request-Timestamp": str(round(time.time()))},
     {"X-Slack-Signature": "FAKE_SIG"},
 )
 
@@ -32,12 +35,14 @@ def post_commands_should_require_headers(path: str, headers: dict, client: TestC
     assert HTTP_422_UNPROCESSABLE_ENTITY == response.status_code
 
 
-def post_commands_should_be_verified(client: TestClient):
+def headers_should_be_verified(client: TestClient, mocker):
+    timestamp_jan_1_2019_noon = 1546340400
+    time = mocker.patch("slackers.verification.time")
+    time.time.return_value = timestamp_jan_1_2019_noon + (5 * 60) - 1
     os.environ["SLACK_SIGNING_SECRET"] = "TEST_SECRET"
-    timestamp_jan_1_2019_noon = "1546340400"
     signature = "v0=66c758f7c180af608f5984e07c562ad8033c2ccce8b21771655fa7dd8d480ebe"
     valid_headers = {
-        "X-Slack-Request-Timestamp": timestamp_jan_1_2019_noon,
+        "X-Slack-Request-Timestamp": str(timestamp_jan_1_2019_noon),
         "X-Slack-Signature": signature,
     }
     challenge = {
@@ -46,4 +51,22 @@ def post_commands_should_be_verified(client: TestClient):
         "type": "url_verification",
     }
     response = client.post("/events", json=challenge, headers=valid_headers)
-    assert 200 == response.status_code
+    assert HTTP_200_OK == response.status_code
+
+def timestamp_should_not_exceed_timeout(client: TestClient, mocker):
+    timestamp_jan_1_2019_noon = 1546340400
+    time = mocker.patch("slackers.verification.time")
+    time.time.return_value = timestamp_jan_1_2019_noon + (5 * 60) + 1
+    os.environ["SLACK_SIGNING_SECRET"] = "TEST_SECRET"
+    signature = "v0=66c758f7c180af608f5984e07c562ad8033c2ccce8b21771655fa7dd8d480ebe"
+    valid_headers = {
+        "X-Slack-Request-Timestamp": str(timestamp_jan_1_2019_noon),
+        "X-Slack-Signature": signature,
+    }
+    challenge = {
+        "token": "SLACK_TOKEN",
+        "challenge": "A REAL CHALLENGE",
+        "type": "url_verification",
+    }
+    response = client.post("/events", json=challenge, headers=valid_headers)
+    assert HTTP_403_FORBIDDEN == response.status_code

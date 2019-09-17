@@ -1,4 +1,6 @@
 import hmac
+import math
+import time
 import logging
 
 from hashlib import sha256
@@ -9,6 +11,10 @@ from starlette.status import HTTP_403_FORBIDDEN
 from starlette.requests import Request
 from starlette.exceptions import HTTPException
 
+log = logging.getLogger(__name__)
+env = Env()
+env.read_env()
+
 
 async def verify_signature(
     request: Request,
@@ -16,10 +22,7 @@ async def verify_signature(
     x_slack_request_timestamp: str = Header(...),
 ):
 
-    log = logging.getLogger(__name__)
     log.debug("Starting verification")
-    env = Env()
-    env.read_env()
 
     body = await request.body()
     to_verify = str.encode("v0:" + str(x_slack_request_timestamp) + ":") + body
@@ -32,3 +35,15 @@ async def verify_signature(
         raise HTTPException(HTTP_403_FORBIDDEN, "Forbidden")
 
     log.debug("Verification successful")
+
+
+def check_timeout(x_slack_request_timestamp: str = Header(...)):
+    timeout = env.int(
+        "SLACK_REQUEST_TIMEOUT_SECONDS", default=5 * 60
+    )
+    request_timeout_time = int(x_slack_request_timestamp) + timeout
+    current_time = math.ceil(time.time())
+
+    if current_time > request_timeout_time:
+        log.info("Slack request timestamp reached timeout")
+        raise HTTPException(HTTP_403_FORBIDDEN, "Forbidden")

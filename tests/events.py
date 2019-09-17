@@ -7,7 +7,7 @@ from slackers.hooks import events
 
 
 @pytest.mark.usefixtures("pass_header_verification")
-def post_events_should_accept_slack_challenge(mocker, client: TestClient):
+def post_events_should_accept_challenge(mocker, client: TestClient, test_headers):
     @events.on("foo")
     def on_challenge(payload):
         inspection(payload=payload)
@@ -18,8 +18,7 @@ def post_events_should_accept_slack_challenge(mocker, client: TestClient):
         "challenge": "CHALLENGE ACCEPTED",
         "type": "challenge",
     }
-    headers = {"X-Slack-Request-Timestamp": "123", "X-Slack-Signature": "FAKE_SIG"}
-    response = client.post(url="/events", json=slack_challenge, headers=headers)
+    response = client.post(url="/events", json=slack_challenge, headers=test_headers)
 
     assert 200 == response.status_code
     assert '"CHALLENGE ACCEPTED"' == response.text
@@ -27,7 +26,9 @@ def post_events_should_accept_slack_challenge(mocker, client: TestClient):
 
 
 @pytest.mark.usefixtures("pass_header_verification")
-def post_events_should_emit_events_event_with_payload(mocker, client: TestClient):
+def post_events_should_emit_events_event_with_payload(
+    mocker, client: TestClient, test_headers
+):
     slack_envelope = {
         "token": "TOKEN",
         "team_id": "TEAM_ID",
@@ -44,9 +45,8 @@ def post_events_should_emit_events_event_with_payload(mocker, client: TestClient
         inspection(payload=payload)
 
     inspection = mocker.Mock()
-    headers = {"X-Slack-Request-Timestamp": "123", "X-Slack-Signature": "FAKE_SIG"}
 
-    response = client.post(url="/events", json=slack_envelope, headers=headers)
+    response = client.post(url="/events", json=slack_envelope, headers=test_headers)
 
     assert HTTP_200_OK == response.status_code
     inspection.assert_called_once_with(payload=slack_envelope)

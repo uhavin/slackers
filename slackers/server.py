@@ -12,7 +12,7 @@ from starlette.responses import Response
 
 from slackers.hooks import actions, commands, emit, events
 from slackers.models import SlackAction, SlackChallenge, SlackCommand, SlackEnvelope
-from slackers.verification import verify_signature
+from slackers.verification import check_timeout, verify_signature
 
 env = Env()
 env.read_env()
@@ -21,7 +21,11 @@ log = logging.getLogger(__name__)
 api = FastAPI()
 
 
-@api.post("/events", dependencies=[Depends(verify_signature)])
+@api.post(
+    "/events",
+    status_code=HTTP_200_OK,
+    dependencies=[Depends(verify_signature), Depends(check_timeout)],
+)
 async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
     if isinstance(message, SlackChallenge):
         return message.challenge
@@ -30,7 +34,11 @@ async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
     return Response()
 
 
-@api.post("/actions", status_code=HTTP_200_OK, dependencies=[Depends(verify_signature)])
+@api.post(
+    "/actions",
+    status_code=HTTP_200_OK,
+    dependencies=[Depends(verify_signature), Depends(check_timeout)],
+)
 async def post_actions(request: Request):
     form = await request.form()
     payload = json.loads(form["payload"])
@@ -44,7 +52,9 @@ async def post_actions(request: Request):
 
 
 @api.post(
-    "/commands", status_code=HTTP_200_OK, dependencies=[Depends(verify_signature)]
+    "/commands",
+    status_code=HTTP_200_OK,
+    dependencies=[Depends(verify_signature), Depends(check_timeout)],
 )
 async def post_commands(request: Request):
     form = await request.form()

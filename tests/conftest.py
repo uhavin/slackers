@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest
 
@@ -10,6 +11,15 @@ from slackers.server import api
 @pytest.fixture
 def client():
     return TestClient(app=api)
+
+
+@pytest.fixture
+def test_headers():
+    recent_timestamp = str(round(time.time()))
+    return {
+        "X-Slack-Request-Timestamp": recent_timestamp,
+        "X-Slack-Signature": "FAKE_SIG",
+    }
 
 
 @pytest.fixture

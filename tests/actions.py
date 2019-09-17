@@ -9,7 +9,9 @@ from slackers.hooks import actions
 
 
 @pytest.mark.usefixtures("pass_header_verification")
-def post_actions_should_emit_actions_event_with_payload(mocker, client: TestClient):
+def post_actions_should_emit_actions_event_with_payload(
+    mocker, client: TestClient, test_headers
+):
     slack_action_payload = {
         "token": "TOKEN",
         "callback_id": "CALLBACK_ID",
@@ -29,10 +31,9 @@ def post_actions_should_emit_actions_event_with_payload(mocker, client: TestClie
         inspection(payload=payload)
 
     inspection = mocker.Mock()
-    headers = {"X-Slack-Request-Timestamp": "123", "X-Slack-Signature": "FAKE_SIG"}
 
     response = client.post(
-        url="/actions", data={"payload": slack_action}, headers=headers
+        url="/actions", data={"payload": slack_action}, headers=test_headers
     )
 
     assert HTTP_200_OK == response.status_code
