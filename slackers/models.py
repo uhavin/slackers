@@ -31,6 +31,7 @@ class SlackAction(SlackBase):
     message: dict = None
     channel: dict = None
     team: dict = None
+    actions: list = None
 
 
 class SlackCommand(SlackBase):

@@ -26,14 +26,38 @@ class Image(BaseModel):
 
 class Context(BaseModel):
     type: str = "context"
-    elements: List[Union[PlainText, Image]]
+    elements: List[PlainText, Image]
 
 
-class ChannelsSelect(BaseModel):
-    type: str = "channels_select"
+class Option(BaseModel):
+    value: str
+    text: PlainText
+
+
+class Select(BaseModel):
     placeholder: PlainText
+    action_id: str
+
+
+class ChannelsSelect(Select):
+    type: str = "channels_select"
+
+
+class UsersSelect(Select):
+    type: str = "users_select"
+
+
+class ConversationsSelect(Select):
+    type: str = "conversations_select"
+
+
+class StaticSelect(Select):
+    type: str = "static_select"
+    options: List[Option]
 
 
 class Actions(BaseModel):
     type: str = "actions"
-    elements: List[Union[ChannelsSelect]]
+    elements: List[
+        Union[StaticSelect, UsersSelect, ChannelsSelect, ConversationsSelect]
+    ]

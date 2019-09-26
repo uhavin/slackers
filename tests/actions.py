@@ -22,6 +22,7 @@ def post_actions_should_emit_actions_event_with_payload(
         "message": {},
         "channel": {"id": "CHANNEL_ID", "name": "CHANNEL_NAME"},
         "team": {"id": "TEAM_ID", "domain": "TEAM_DOMAIN"},
+        "actions": [],
     }
 
     slack_action = json.dumps(slack_action_payload)
