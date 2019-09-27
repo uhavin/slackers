@@ -40,13 +40,20 @@ async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
 )
 async def post_actions(request: Request):
     form = await request.form()
-    payload = json.loads(form["payload"])
+    form_data = json.loads(form["payload"])
 
     # have the convenience of pydantic validation
-    action = SlackAction(**payload)
+    action = SlackAction(**form_data)
 
     emit(actions, action.type, payload=action)
 
+    if action.actions:
+        for triggered_action in action.actions:
+            event_type = f"{action.type}:{triggered_action['action_id']}"
+            emit(actions, event_type, action)
+    if action.callback_id:
+        event_type = f"{action.type}:{action.callback_id}"
+        emit(actions, event_type, action)
     return Response()
 
 

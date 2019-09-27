@@ -1,14 +1,14 @@
 import asyncio
 import logging
 
-from pyee import BaseEventEmitter
+from pyee import AsyncIOEventEmitter
 from fastapi.encoders import jsonable_encoder
 
 
-class NamedEventEmitter(BaseEventEmitter):
+class NamedEventEmitter(AsyncIOEventEmitter):
     def __init__(self, name, *args, **kwargs):
         self.name = name
-        return BaseEventEmitter.__init__(self, *args, **kwargs)
+        return AsyncIOEventEmitter.__init__(self, *args, **kwargs)
 
 
 events = NamedEventEmitter(name="events")
@@ -22,8 +22,4 @@ def emit(emitter, event, payload):
     log.info(f"Emitting '{event}' using emitter '{emitter.name}'")
     log.debug(jsonable)
 
-    async def _emit_async(emitter, event, payload):
-        emitter.emit(event, jsonable)
-
-    loop = asyncio.get_event_loop()
-    loop.create_task(_emit_async(emitter, event, payload))
+    emitter.emit(event, jsonable)
