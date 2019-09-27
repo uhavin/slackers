@@ -9,7 +9,7 @@ from slackers.hooks import actions
 
 
 @pytest.mark.usefixtures("pass_header_verification")
-def post_actions_should_emit_actions_event_with_payload(
+def post_message_actions_should_emit_actions_event_with_payload(
     mocker, client: TestClient, test_headers
 ):
     slack_action_payload = {
@@ -23,6 +23,39 @@ def post_actions_should_emit_actions_event_with_payload(
         "channel": {"id": "CHANNEL_ID", "name": "CHANNEL_NAME"},
         "team": {"id": "TEAM_ID", "domain": "TEAM_DOMAIN"},
         "actions": [],
+    }
+
+    slack_action = json.dumps(slack_action_payload)
+
+    @actions.on("foo")
+    def on_foo(payload):
+        inspection(payload=payload)
+
+    inspection = mocker.Mock()
+
+    response = client.post(
+        url="/actions", data={"payload": slack_action}, headers=test_headers
+    )
+
+    assert HTTP_200_OK == response.status_code
+    inspection.assert_called_once_with(payload=slack_action_payload)
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_block_actions_should_emit_actions_event_with_payload(
+    mocker, client: TestClient, test_headers
+):
+    slack_action_payload = {
+        "token": "TOKEN",
+        "callback_id": None,
+        "trigger_id": "TRIGGER_ID",
+        "response_url": "https://example.com/response",
+        "type": "foo",
+        "user": {"id": "USER_ID", "name": "USER_NAME"},
+        "message": {},
+        "channel": {"id": "CHANNEL_ID", "name": "CHANNEL_NAME"},
+        "team": {"id": "TEAM_ID", "domain": "TEAM_DOMAIN"},
+        "actions": [{"action_id": "ACTION_ID"}],
     }
 
     slack_action = json.dumps(slack_action_payload)
