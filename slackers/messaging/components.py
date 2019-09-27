@@ -26,7 +26,7 @@ class Image(BaseModel):
 
 class Context(BaseModel):
     type: str = "context"
-    elements: List[PlainText, Image]
+    elements: List[Union[PlainText, Image]]
 
 
 class Option(BaseModel):
