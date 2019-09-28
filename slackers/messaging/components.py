@@ -1,41 +1,48 @@
 from typing import List, Union
+
 from pydantic import BaseModel, UrlStr
 
-
-class PlainText(BaseModel):
-    type: str = "plain_text"
-    text: str
-    emoji: bool = True
+from .accessories import Accessory
+from .common_elements import EmojiText, Text
 
 
-class Divider(BaseModel):
+class SlackBlock(BaseModel):
+    type: str
+
+
+class Divider(SlackBlock):
     type: str = "divider"
 
 
 class Section(BaseModel):
     type: str = "section"
-    text: PlainText
+    text: EmojiText
+
+
+class AccessorySection(Section):
+    text: Text
+    accessory: Accessory
 
 
 class Image(BaseModel):
     type: str = "image"
     image_url: UrlStr
-    title: PlainText = None
+    title: EmojiText = None
     alt_text: str = ""
 
 
 class Context(BaseModel):
     type: str = "context"
-    elements: List[Union[PlainText, Image]]
+    elements: List[Union[EmojiText, Image]]
 
 
 class Option(BaseModel):
     value: str
-    text: PlainText
+    text: EmojiText
 
 
 class Select(BaseModel):
-    placeholder: PlainText
+    placeholder: EmojiText
     action_id: str
 
 
@@ -58,6 +65,4 @@ class StaticSelect(Select):
 
 class Actions(BaseModel):
     type: str = "actions"
-    elements: List[
-        Union[StaticSelect, UsersSelect, ChannelsSelect, ConversationsSelect]
-    ]
+    elements: List[Select]
