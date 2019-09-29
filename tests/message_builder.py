@@ -4,7 +4,7 @@ from slackers.messaging.composition import MessageBuilder
 def add_divider_should_put_divider_in_message_blocks():
     message = MessageBuilder()
     message.add_divider()
-    assert message.dict() == {"blocks": [{"type": "divider"}]}
+    assert message.dict() == {"channel": None, "blocks": [{"type": "divider"}]}
 
 
 def creating_section_should_add_section():
@@ -12,12 +12,13 @@ def creating_section_should_add_section():
     message.create_section(text="Hello World")
 
     expect = {
+        "channel": None,
         "blocks": [
             {
                 "type": "section",
-                "text": {"text": "Hello World", "type": "mrkdwn", "emoji": True},
+                "text": {"text": "Hello World", "type": "mrkdwn"},
             }
-        ]
+        ],
     }
 
     assert message.dict() == expect
@@ -26,16 +27,16 @@ def creating_section_should_add_section():
 def create_section_should_return_the_section_to_allow_modification():
     message = MessageBuilder()
     section = message.create_section(text="Hello World")
-    section.text.emoji = False
     section.text.type = "plain_text"
 
     expect = {
+        "channel": None,
         "blocks": [
             {
                 "type": "section",
-                "text": {"text": "Hello World", "type": "plain_text", "emoji": False},
+                "text": {"text": "Hello World", "type": "plain_text"},
             }
-        ]
+        ],
     }
 
     assert message.dict() == expect
@@ -47,6 +48,7 @@ def add_secction_with_button_should_add_section_with_accessory_button():
         text="Hello World", button_text="Push it", button_value="push_it"
     )
     expect = {
+        "channel": None,
         "blocks": [
             {
                 "type": "section",
@@ -57,7 +59,7 @@ def add_secction_with_button_should_add_section_with_accessory_button():
                     "value": "push_it",
                 },
             }
-        ]
+        ],
     }
 
     assert message.dict() == expect

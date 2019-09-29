@@ -1,23 +1,29 @@
 from typing import List
 
 from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
 
-from .components import AccessorySection, Divider, Section, SlackBlock
-from .accessories import Accessory, Button, ButtonText
+from .accessories import Button, ButtonText
 from .common_elements import Text, EmojiText
+from .components import AccessorySection, Divider, Section, SlackBlock
 
 
 class MessageBuilder(BaseModel):
     blocks: List[SlackBlock] = list()
+    channel: str = None
+
+    def slack_blocks(self):
+        return jsonable_encoder(self.blocks)
 
     def add(self, block: SlackBlock):
         self.blocks.append(block)
 
     def add_divider(self):
-        self.add(Divider())
+        divider = Divider()
+        self.add(divider)
 
     def create_section(self, text) -> Section:
-        section = Section(text=EmojiText(text=text))
+        section = Section(text=Text(text=text))
         self.add(section)
         return section
 

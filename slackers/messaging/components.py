@@ -14,9 +14,9 @@ class Divider(SlackBlock):
     type: str = "divider"
 
 
-class Section(BaseModel):
+class Section(SlackBlock):
     type: str = "section"
-    text: EmojiText
+    text: Text
 
 
 class AccessorySection(Section):
