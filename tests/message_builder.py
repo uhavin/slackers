@@ -14,10 +14,7 @@ def creating_section_should_add_section():
     expect = {
         "channel": None,
         "blocks": [
-            {
-                "type": "section",
-                "text": {"text": "Hello World", "type": "mrkdwn"},
-            }
+            {"type": "section", "text": {"text": "Hello World", "type": "mrkdwn"}}
         ],
     }
 
@@ -32,10 +29,7 @@ def create_section_should_return_the_section_to_allow_modification():
     expect = {
         "channel": None,
         "blocks": [
-            {
-                "type": "section",
-                "text": {"text": "Hello World", "type": "plain_text"},
-            }
+            {"type": "section", "text": {"text": "Hello World", "type": "plain_text"}}
         ],
     }
 
@@ -63,3 +57,10 @@ def add_secction_with_button_should_add_section_with_accessory_button():
     }
 
     assert message.dict() == expect
+
+
+def slack_blocks_should_return_blocks_as_jsonable_list():
+    message = MessageBuilder()
+    message.add_divider()
+    message.add_divider()
+    assert message.slack_blocks() == [{"type": "divider"}, {"type": "divider"}]
