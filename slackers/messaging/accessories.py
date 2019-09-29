@@ -2,7 +2,7 @@ from typing_extensions import Literal
 
 from pydantic import BaseModel
 
-from .common_elements import EmojiText
+from .elements import EmojiText
 
 
 class Accessory(BaseModel):

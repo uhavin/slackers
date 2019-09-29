@@ -1,12 +1,11 @@
 from typing import List, Union
 
-from pydantic import BaseModel, UrlStr
-
+from .common import SlackModel
 from .accessories import Accessory
-from .common_elements import EmojiText, Text
+from .elements import EmojiText, Text, Image
 
 
-class SlackBlock(BaseModel):
+class SlackBlock(SlackModel):
     type: str
 
 
@@ -24,24 +23,17 @@ class AccessorySection(Section):
     accessory: Accessory
 
 
-class Image(BaseModel):
-    type: str = "image"
-    image_url: UrlStr
-    title: EmojiText = None
-    alt_text: str = ""
-
-
-class Context(BaseModel):
+class Context(SlackBlock):
     type: str = "context"
-    elements: List[Union[EmojiText, Image]]
+    elements: List[Union[Text, Image]]
 
 
-class Option(BaseModel):
+class Option(SlackModel):
     value: str
     text: EmojiText
 
 
-class Select(BaseModel):
+class Select(SlackModel):
     placeholder: EmojiText
     action_id: str
 
@@ -63,6 +55,6 @@ class StaticSelect(Select):
     options: List[Option]
 
 
-class Actions(BaseModel):
+class Actions(SlackBlock):
     type: str = "actions"
     elements: List[Select]
