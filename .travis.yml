@@ -3,7 +3,7 @@ python:
   - "3.6"
   - "3.7"
 before_install:
-  - pip instsall poetry
+  - pip install poetry
 install:
   - poetry install
 script:
