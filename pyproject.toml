@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "slackers"
+version = "0.1.0"
+description = "Slack interaction webhooks served by FastAPI"
+authors = ["Niels van Huijstee <niels@huijs.net>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pyee = "^6.0"
+python-multipart = "^0.0.5"
+requests = "^2.22"
+fastapi = "^0.42"
+
+[tool.poetry.extras]
+uvicorn=["uvicorn"]
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pytest-cov = "^2.8"
+pytest-mock = "^1.11"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

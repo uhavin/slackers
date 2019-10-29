@@ -19,6 +19,11 @@ incomplete_headers = (
 )
 
 
+@pytest.fixture(autouse=True)
+def set_slack_test_secret():
+    os.environ["SLACK_SIGNING_SECRET"] = "TEST_SECRET"
+
+
 @pytest.mark.parametrize("path", paths)
 def post_commands_should_verify_headers(path: str, client: TestClient):
     complete_but_invalid_headers = {
@@ -39,7 +44,6 @@ def headers_should_be_verified(client: TestClient, mocker):
     timestamp_jan_1_2019_noon = 1546340400
     time = mocker.patch("slackers.verification.time")
     time.time.return_value = timestamp_jan_1_2019_noon + (5 * 60) - 1
-    os.environ["SLACK_SIGNING_SECRET"] = "TEST_SECRET"
     signature = "v0=66c758f7c180af608f5984e07c562ad8033c2ccce8b21771655fa7dd8d480ebe"
     valid_headers = {
         "X-Slack-Request-Timestamp": str(timestamp_jan_1_2019_noon),

@@ -1,7 +1,0 @@
-environs
-fastapi
-pydantic
-pyee
-python-multipart
-requests
-uvicorn

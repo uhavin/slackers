@@ -3,7 +3,6 @@ import logging
 
 from typing import Union
 
-from environs import Env
 from fastapi import Depends, FastAPI
 from starlette.status import HTTP_200_OK
 from starlette.requests import Request
@@ -13,8 +12,6 @@ from slackers.hooks import actions, commands, emit, events
 from slackers.models import SlackAction, SlackChallenge, SlackCommand, SlackEnvelope
 from slackers.verification import check_timeout, verify_signature
 
-env = Env()
-env.read_env()
 log = logging.getLogger(__name__)
 
 api = FastAPI()
