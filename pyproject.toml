@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "slackers"
-version = "0.1.0"
+version = "0.1.1"
 description = "Slack interaction webhooks served by FastAPI"
 authors = ["Niels van Huijstee <niels@huijs.net>"]
 license = "MIT"

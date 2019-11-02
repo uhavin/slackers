@@ -3,7 +3,7 @@ import logging
 
 from typing import Union
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, APIRouter
 from starlette.status import HTTP_200_OK
 from starlette.requests import Request
 from starlette.responses import Response
@@ -16,8 +16,11 @@ log = logging.getLogger(__name__)
 
 api = FastAPI()
 
+router = APIRouter()
+api.include_router(router)
 
-@api.post(
+
+@router.post(
     "/events",
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
@@ -30,7 +33,7 @@ async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
     return Response()
 
 
-@api.post(
+@router.post(
     "/actions",
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
@@ -54,7 +57,7 @@ async def post_actions(request: Request):
     return Response()
 
 
-@api.post(
+@router.post(
     "/commands",
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
