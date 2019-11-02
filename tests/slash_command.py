@@ -21,7 +21,6 @@ def post_commands_should_emit_commands_event_with_payload(
         "command": "/foo",
         "response_url": "https://example.com/response_url",
         "trigger_id": "TRIGGER_ID",
-        "user_id": "USER_ID",
         "user_name": "USER_NAME",
         "team_id": "TEAM_ID",
         "channel_id": "CHANNEL_ID",
