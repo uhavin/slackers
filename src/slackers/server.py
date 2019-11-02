@@ -14,10 +14,8 @@ from slackers.verification import check_timeout, verify_signature
 
 log = logging.getLogger(__name__)
 
-api = FastAPI()
 
 router = APIRouter()
-api.include_router(router)
 
 
 @router.post(
@@ -68,3 +66,7 @@ async def post_commands(request: Request):
     emit(commands, command.command.lstrip("/"), command)
 
     return Response()
+
+
+api = FastAPI()
+api.include_router(router)
