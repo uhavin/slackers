@@ -24,10 +24,14 @@ interactive components on `/actions` and for slash commands on `/commands`.
 When an interaction is received, it will emit an event. You can listen
 for these events as shown in the following examples.
 
+On receiving a request, Slackers will emit an event which you can handle yourself.
+Slackers will also respond to Slack with an (empty) http 200 response telling Slack
+all is well received.
+
 ### Starting the server
-As said, this app is an implementation of the excellent FastAPI. Since you're here, 
-I'm assuming you know what it is, but if you don't, you can learn all about 
-how it works with [this tutorial](https://fastapi.tiangolo.com/tutorial/intro/). 
+As said, Slackers uses the excellent FastAPI to serve it's endpoints. Since you're here, 
+I'm assuming you know what FastAPI is, but if you don't, you can learn all about 
+how that works with [this tutorial](https://fastapi.tiangolo.com/tutorial/intro/). 
 
 Slackers offers you a router which you can include in your own FastAPI.
 ```python
@@ -48,9 +52,10 @@ the prefix as shown above, on `/slack/events`.
 #### Accepting the challenge
 When setting up Slack to [send events](https://api.slack.com/events-api#subscribing_to_event_types),
 it will first send a challenge to verify your endpoint. Slackers detects when a challenge is sent.
-You can simply start your api and Slackers will meet the challenge automatically.
+You can simply start our api and Slackers will meet the challenge automatically.
 
-On receiving an event, Slackers will emit a python event, which you can listen for as shown below.
+#### Responding to events
+On receiving an event, Slackers will emit a python event, which you can act upon as shown below.
 ```python
 import logging
 from slackers.hooks import events
@@ -63,10 +68,12 @@ def handle_mention(payload):
     log.debug(payload)
 ```
 
+
 ### Actions
 Once your server is running, the actions endpoint is setup at `/actions`, or if you use
 the prefix as shown above, on `/slack/actions`.
 
+#### Responding to actions
 On receiving an action, Slackers will emit a python event, which you can listen for as 
 shown below. You can listen for the action type, or more specifically for the action id
 or callback id linked to the action.
@@ -95,12 +102,13 @@ def handle_action_by_callback_id(payload):
     log.debug(payload)
 ```
 
-### Actions
+### Slash commands
 Once your server is running, the commands endpoint is setup at `/commands`, or if you use
 the prefix as shown above, on `/slack/commands`. Slackers will emit an event with the name
 of the command, so if your command is `/engage`, you can listen for the event `engage`
 (without the slash)
 
+#### Responding to slash commands
 On receiving a command, Slackers will emit a python event, which you can listen for as shown below.
 ```python
 import logging
