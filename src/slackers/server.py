@@ -3,7 +3,7 @@ import logging
 
 from typing import Union
 
-from fastapi import Depends, FastAPI, APIRouter
+from fastapi import Depends, APIRouter
 from starlette.status import HTTP_200_OK
 from starlette.requests import Request
 from starlette.responses import Response
@@ -66,7 +66,3 @@ async def post_commands(request: Request):
     emit(commands, command.command.lstrip("/"), command)
 
     return Response()
-
-
-api = FastAPI()
-api.include_router(router)

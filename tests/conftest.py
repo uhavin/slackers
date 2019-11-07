@@ -2,15 +2,18 @@ import os
 import time
 
 import pytest
+from fastapi import FastAPI
 
 from starlette.testclient import TestClient
 
-from slackers.server import api
+from slackers.server import router
 
 
 @pytest.fixture
 def client():
-    return TestClient(app=api)
+    app = FastAPI()
+    app.include_router(router)
+    return TestClient(app=app)
 
 
 @pytest.fixture
