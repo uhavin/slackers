@@ -1,6 +1,13 @@
 # Slackers
 
-Slackers is a FastAPI implementation to handle Slack interactions.  
+Slack webhooks API served by FastAPI
+
+## What is Slackers
+Slackers is a [FastAPI](https://fastapi.tiangolo.com) implementation to handle Slack interactions and events.
+It serves endpoints to receive [slash commands](https://api.slack.com/interactivity/slash-commands),
+[app actions](https://api.slack.com/interactivity/actions), [interactive components](https://api.slack.com/interactivity/components). 
+It also listens for events sent to the Slack Events API [Slack Events](https://api.slack.com/events-api). 
+
 ## Installation
 You can install Slackers with pip
 `$ pip install slackers`
@@ -14,14 +21,39 @@ verify the incoming requests signature.
 ## Example usage
 Slackers will listen for activity from the Events API on `/events`, for
 interactive components on `/actions` and for slash commands on `/commands`.
-When an interaction is received, it will send an event. You can listen
+When an interaction is received, it will emit an event. You can listen
 for these events as shown in the following examples.
 
+### Starting the server
+As said, this app is an implementation of the excellent FastAPI. Since you're here, 
+I'm assuming you know what it is, but if you don't, you can learn all about 
+how it works with [this tutorial](https://fastapi.tiangolo.com/tutorial/intro/). 
+
+Slackers offers you a router which you can include in your own FastAPI.
+```python
+from fastapi import FastAPI
+from slackers.server import router
+
+app = FastAPI()
+app.include_router(router)
+
+# Optionally you can use a prefix
+app.include_router(router, prefix='/slack')
+```
+
+### Events
+Once your server is running, the events endpoint is setup at `/events`, or if you use
+the prefix as shown above, on `/slack/events`.
+
+#### Accepting the challenge
+When setting up Slack to [send events](https://api.slack.com/events-api#subscribing_to_event_types),
+it will first send a challenge to verify your endpoint. Slackers detects when a challenge is sent.
+You can simply start your api and Slackers will meet the challenge automatically.
+
+On receiving an event, Slackers will emit a python event, which you can listen for as shown below.
 ```python
 import logging
-
-from slackers.hooks import actions, commands, events
-from slackers.server import api
+from slackers.hooks import events
 
 log = logging.getLogger(__name__)
 
@@ -29,41 +61,56 @@ log = logging.getLogger(__name__)
 def handle_mention(payload):
     log.info("App was mentioned.")
     log.debug(payload)
+```
 
+### Actions
+Once your server is running, the actions endpoint is setup at `/actions`, or if you use
+the prefix as shown above, on `/slack/actions`.
 
+On receiving an action, Slackers will emit a python event, which you can listen for as 
+shown below. You can listen for the action type, or more specifically for the action id
+or callback id linked to the action.
+```python
+import logging
+from slackers.hooks import actions
+
+log = logging.getLogger(__name__)
+
+# Listening for the action type.
 @actions.on("block_actions")
 def handle_action(payload):
     log.info("Action started.")
     log.debug(payload)
 
-@actions.on("block_actions:action_id")
+# Listen for an action by it's action_id
+@actions.on("block_actions:your_action_id")
 def handle_action_by_id(payload):
     log.info("Action started.")
     log.debug(payload)
 
-
-@actions.on("block_actions:callback_id")
+# Listen for an action by it's callback_id
+@actions.on("block_actions:your_callback_id")
 def handle_action_by_callback_id(payload):
     log.info(f"Action started.")
     log.debug(payload)
+```
+
+### Actions
+Once your server is running, the commands endpoint is setup at `/commands`, or if you use
+the prefix as shown above, on `/slack/commands`. Slackers will emit an event with the name
+of the command, so if your command is `/engage`, you can listen for the event `engage`
+(without the slash)
+
+On receiving a command, Slackers will emit a python event, which you can listen for as shown below.
+```python
+import logging
+from slackers.hooks import commands
+
+log = logging.getLogger(__name__)
 
 
-@commands.on("foo")  # responds to "/foo"  
+@commands.on("engage")  # responds to "/engage"  
 def handle_command(payload):
     log.info("Command received")
     log.debug(payload)
-
-
-app = api
-```
-
-Or, if you already have an API running, you can add slackers as a router
-```python
-from fastapi import FastAPI
-from slackers.server import router as slack_router
-
-...
-
-my_app = FastAPI()
-my_app.include_router(slack_router, prefix="/slack")
 ```
