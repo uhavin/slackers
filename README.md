@@ -122,3 +122,23 @@ def handle_command(payload):
     log.info("Command received")
     log.debug(payload)
 ```
+
+### Async
+Since events are emitted using pyee's Async event emitter, it is possible to define your event handlers
+as async functions. Just keep in mind that errors are in this case emitted on the 'error' event. 
+
+```python
+import logging
+from slackers.hooks import commands
+
+log = logging.getLogger(__name__)
+
+@commands.on('error')
+def log_error(exc):
+    log.error(str(exc))
+
+
+@commands.on("engage")  # responds to "/engage"  
+async def handle_command(payload):
+    ...
+```
