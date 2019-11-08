@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from pyee import AsyncIOEventEmitter
@@ -15,10 +16,12 @@ actions = NamedEventEmitter(name="actions")
 commands = NamedEventEmitter(name="commands")
 
 
-def emit(emitter, event, payload):
+def emit(emitter: NamedEventEmitter, event, payload):
+    async def _emit_async():
+        emitter.emit(event, payload)
+
     jsonable = jsonable_encoder(payload)
     log = logging.getLogger(__name__)
     log.info(f"Emitting '{event}' using emitter '{emitter.name}'")
     log.debug(jsonable)
-
-    emitter.emit(event, jsonable)
+    asyncio.create_task(_emit_async())
