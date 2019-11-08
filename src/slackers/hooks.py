@@ -18,10 +18,10 @@ commands = NamedEventEmitter(name="commands")
 
 def emit(emitter: NamedEventEmitter, event, payload):
     async def _emit_async():
-        emitter.emit(event, payload)
+        emitter.emit(event, jsonable_payload)
 
-    jsonable = jsonable_encoder(payload)
+    jsonable_payload = jsonable_encoder(payload)
     log = logging.getLogger(__name__)
     log.info(f"Emitting '{event}' using emitter '{emitter.name}'")
-    log.debug(jsonable)
+    log.debug(jsonable_payload)
     asyncio.create_task(_emit_async())
