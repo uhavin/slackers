@@ -24,7 +24,7 @@ python = "^3.6"
 pyee = "^6.0"
 python-multipart = "^0.0.5"
 requests = "^2.22"
-fastapi = "^0.42"
+fastapi = "^0"
 
 [tool.poetry.extras]
 uvicorn=["uvicorn"]
