@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "slackers"
-version = "0.2.2"
+version = "0.2.3"
 readme = "README.md"
 homepage = "https://github.com/uhavin/slackers"
 repository = "https://github.com/uhavin/slackers"
