@@ -21,6 +21,7 @@ def message_action():
         "channel": {"id": "CHANNEL_ID", "name": "CHANNEL_NAME"},
         "team": {"id": "TEAM_ID", "domain": "TEAM_DOMAIN"},
         "actions": [],
+        "view": {},
     }
 
 
@@ -37,6 +38,7 @@ def block_action():
         "channel": {"id": "CHANNEL_ID", "name": "CHANNEL_NAME"},
         "team": {"id": "TEAM_ID", "domain": "TEAM_DOMAIN"},
         "actions": [{"action_id": "ACTION_ID_1"}, {"action_id": "ACTION_ID_2"}],
+        "view": {},
     }
 
 
