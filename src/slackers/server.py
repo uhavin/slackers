@@ -52,6 +52,10 @@ async def post_actions(request: Request):
     if action.callback_id:
         event_type = f"{action.type}:{action.callback_id}"
         emit(actions, event_type, action)
+    elif action.view:
+        if action.view.callback_id:
+            event_type = f"{action.type}:{action.view.callback_id}"
+            emit(actions, event_type, action)
     return Response()
 
 
