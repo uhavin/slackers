@@ -23,15 +23,23 @@ class SlackEnvelope(SlackBase):
 
 
 class SlackAction(SlackBase):
-    callback_id: str = None
-    trigger_id: str = None
-    response_url: str = None
-    type: str = None
-    user: dict = None
-    message: dict = None
-    channel: dict = None
-    team: dict = None
+    class Config:
+        extra = "allow"
+
+    type: str
+
     actions: list = None
+    api_app_id: str = None
+    callback_id: str = None
+    channel: dict = None
+    container: dict = None
+    hash: str = None
+    is_cleared: bool = None
+    message: dict = None
+    response_url: str = None
+    team: dict = None
+    trigger_id: str = None
+    user: dict = None
     view: dict = None
 
 
