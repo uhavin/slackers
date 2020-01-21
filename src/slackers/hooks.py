@@ -24,4 +24,6 @@ def emit(emitter: NamedEventEmitter, event, payload):
     log = logging.getLogger(__name__)
     log.info(f"Emitting '{event}' using emitter '{emitter.name}'")
     log.debug(jsonable_payload)
-    asyncio.create_task(_emit_async())
+
+    loop = asyncio.get_event_loop()
+    loop.create_task(_emit_async())
