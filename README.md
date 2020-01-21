@@ -31,7 +31,7 @@ all is well received.
 ### Starting the server
 As said, Slackers uses the excellent FastAPI to serve it's endpoints. Since you're here, 
 I'm assuming you know what FastAPI is, but if you don't, you can learn all about 
-how that works with [this tutorial](https://fastapi.tiangolo.com/tutorial/intro/). 
+how that works with [this tutorial](https://fastapi.tiangolo.com/tutorial/). 
 
 Slackers offers you a router which you can include in your own FastAPI.
 ```python
