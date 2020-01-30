@@ -227,17 +227,15 @@ def post_view_submission_should_return_a_custom_response(
     mocker, client: TestClient, test_headers, view_submission
 ):
     action_payload = json.dumps(view_submission)
-    specific_event_callee = mocker.Mock()
 
     def custom_response(actual_payload):
         from starlette.responses import JSONResponse
-
         assert view_submission == actual_payload
         return JSONResponse(content={"custom": "Custom Response"})
 
-    @actions.on("view_submission:VIEW_CALLBACK_ID", r=custom_response)
-    def on_view_submission_callback_id(payload):
-        specific_event_callee(payload=payload)
+    from slackers.registry import R
+
+    R.add("view_submission:VIEW_CALLBACK_ID", custom_response)
 
     response = client.post(
         url="/actions", data={"payload": action_payload}, headers=test_headers

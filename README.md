@@ -102,6 +102,28 @@ def handle_action_by_callback_id(payload):
     log.debug(payload)
 ```
 
+### Custom responses
+Slackers tries to be fast to respond to Slack. The events you are listening for with the
+likes of `@actions.on(...)` are scheduled as an async task in a fire and forget fashion.
+After scheduling these events, Slackers will by default return an empty 200 response which
+might happen before the events are handled. 
+
+In some cases you might want to act on the payload before returning a response to slack.
+For this, you can use the slackers response registry. Instead of listening for an event,
+you can register your own handler to handle the payload and return your response.
+
+```python
+from starlette.responses import JSONResponse
+from slackers.registry import R
+
+def custom_handler(payload):
+    # handle your payload
+    ...
+    return JSONResponse(content={"custom": "Custom Response"})
+
+R.add(event="view_submission:CALLBACK_ID", handler=custom_handler)
+```
+
 ### Slash commands
 Once your server is running, the commands endpoint is setup at `/commands`, or if you use
 the prefix as shown above, on `/slack/commands`. Slackers will emit an event with the name

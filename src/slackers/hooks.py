@@ -13,11 +13,6 @@ class NamedEventEmitter(AsyncIOEventEmitter):
 
         AsyncIOEventEmitter.__init__(self, *args, **kwargs)
 
-    def on(self, event, f=None, r=None):
-        if r:
-            R.add(event, r)
-        return AsyncIOEventEmitter.on(self, event, f)
-
 
 events = NamedEventEmitter(name="events")
 actions = NamedEventEmitter(name="actions")
