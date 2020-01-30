@@ -223,6 +223,31 @@ def post_view_submission_should_emit_selected_action_event_with_payload(
 
 
 @pytest.mark.usefixtures("pass_header_verification")
+def post_view_submission_should_return_a_custom_response(
+    mocker, client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    specific_event_callee = mocker.Mock()
+
+    def custom_response(actual_payload):
+        from starlette.responses import JSONResponse
+
+        assert view_submission == actual_payload
+        return JSONResponse(content={"custom": "Custom Response"})
+
+    @actions.on("view_submission:VIEW_CALLBACK_ID", r=custom_response)
+    def on_view_submission_callback_id(payload):
+        specific_event_callee(payload=payload)
+
+    response = client.post(
+        url="/actions", data={"payload": action_payload}, headers=test_headers
+    )
+
+    assert HTTP_200_OK == response.status_code
+    assert {"custom": "Custom Response"} == response.json()
+
+
+@pytest.mark.usefixtures("pass_header_verification")
 def post_view_closed_should_emit_closed_event(
     mocker, client: TestClient, test_headers, view_closed
 ):
@@ -243,7 +268,7 @@ def post_view_closed_should_emit_closed_event(
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_view_closed_should_emit_closed_event_callback_id(
-        mocker, client: TestClient, test_headers, view_closed
+    mocker, client: TestClient, test_headers, view_closed
 ):
     # This might be a nonexistent use case, but even so, if a callback id
     # is in a view_closed body, the callback_id event will be emitted as

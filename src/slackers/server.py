@@ -1,19 +1,18 @@
 import json
 import logging
+import typing
 
-from typing import Union
-
-from fastapi import Depends, APIRouter
-from starlette.status import HTTP_200_OK
+from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.responses import Response
+from starlette.status import HTTP_200_OK
 
 from slackers.hooks import actions, commands, emit, events
 from slackers.models import SlackAction, SlackChallenge, SlackCommand, SlackEnvelope
+from slackers.registry import R
 from slackers.verification import check_timeout, verify_signature
 
 log = logging.getLogger(__name__)
-
 
 router = APIRouter()
 
@@ -23,7 +22,7 @@ router = APIRouter()
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
 )
-async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
+async def post_events(message: typing.Union[SlackEnvelope, SlackChallenge]):
     if isinstance(message, SlackChallenge):
         return message.challenge
 
@@ -36,7 +35,7 @@ async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
 )
-async def post_actions(request: Request):
+async def post_actions(request: Request) -> Response:
     form = await request.form()
     form_data = json.loads(form["payload"])
 
@@ -57,7 +56,10 @@ async def post_actions(request: Request):
         if not view_callback_id:
             return
         event_type = f"{action.type}:{view_callback_id}"
+        if event_type in R._registry:
+            return R.handle(event_type, action)
         emit(actions, event_type, action)
+
     return Response()
 
 

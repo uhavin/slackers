@@ -4,11 +4,19 @@ import logging
 from pyee import AsyncIOEventEmitter
 from fastapi.encoders import jsonable_encoder
 
+from slackers.registry import R
+
 
 class NamedEventEmitter(AsyncIOEventEmitter):
     def __init__(self, name, *args, **kwargs):
         self.name = name
+
         AsyncIOEventEmitter.__init__(self, *args, **kwargs)
+
+    def on(self, event, f=None, r=None):
+        if r:
+            R.add(event, r)
+        return AsyncIOEventEmitter.on(self, event, f)
 
 
 events = NamedEventEmitter(name="events")
@@ -17,6 +25,9 @@ commands = NamedEventEmitter(name="commands")
 
 
 def emit(emitter: NamedEventEmitter, event, payload):
+    listeners = emitter.listeners(event)
+    print(listeners)
+
     async def _emit_async():
         emitter.emit(event, jsonable_payload)
 
