@@ -4,10 +4,21 @@ import logging
 from pyee import AsyncIOEventEmitter
 from fastapi.encoders import jsonable_encoder
 
+from .registry import R
+
+
+def responder(event):
+    def wrapper(original):
+        R.add(event, original)
+        return original
+
+    return wrapper
+
 
 class NamedEventEmitter(AsyncIOEventEmitter):
     def __init__(self, name, *args, **kwargs):
         self.name = name
+
         AsyncIOEventEmitter.__init__(self, *args, **kwargs)
 
 

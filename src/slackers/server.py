@@ -1,19 +1,18 @@
 import json
 import logging
+import typing
 
-from typing import Union
-
-from fastapi import Depends, APIRouter
-from starlette.status import HTTP_200_OK
+from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.responses import Response
+from starlette.status import HTTP_200_OK
 
 from slackers.hooks import actions, commands, emit, events
 from slackers.models import SlackAction, SlackChallenge, SlackCommand, SlackEnvelope
+from slackers.registry import R
 from slackers.verification import check_timeout, verify_signature
 
 log = logging.getLogger(__name__)
-
 
 router = APIRouter()
 
@@ -23,7 +22,7 @@ router = APIRouter()
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
 )
-async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
+async def post_events(message: typing.Union[SlackEnvelope, SlackChallenge]):
     if isinstance(message, SlackChallenge):
         return message.challenge
 
@@ -36,28 +35,41 @@ async def post_events(message: Union[SlackEnvelope, SlackChallenge]):
     status_code=HTTP_200_OK,
     dependencies=[Depends(verify_signature), Depends(check_timeout)],
 )
-async def post_actions(request: Request):
+async def post_actions(request: Request) -> Response:
     form = await request.form()
     form_data = json.loads(form["payload"])
-
     # have the convenience of pydantic validation
     action = SlackAction(**form_data)
-
-    emit(actions, action.type, payload=action)
-
+    _events = [action.type]
     if action.actions:
-        for triggered_action in action.actions:
-            event_type = f"{action.type}:{triggered_action['action_id']}"
-            emit(actions, event_type, action)
+        triggered_events = [
+            f"{action.type}:{triggered_action['action_id']}"
+            for triggered_action in action.actions
+        ]
+        _events.extend(triggered_events)
     if action.callback_id:
-        event_type = f"{action.type}:{action.callback_id}"
-        emit(actions, event_type, action)
+        _events.append(f"{action.type}:{action.callback_id}")
     if action.view:
         view_callback_id = action.view.get("callback_id")
-        if not view_callback_id:
-            return
-        event_type = f"{action.type}:{view_callback_id}"
-        emit(actions, event_type, action)
+        if view_callback_id:
+            _events.append(f"{action.type}:{view_callback_id}")
+
+    for _event in _events:
+        emit(actions, _event, payload=action)
+
+    registered_handlers = set(R.callbacks.keys())
+    registered_events = set(_events)
+    handlers_to_call = registered_handlers.intersection(registered_events)
+    if len(handlers_to_call) > 1:
+        raise ValueError(f"Multiple response handlers found.")
+
+    if handlers_to_call:
+        handle = handlers_to_call.pop()
+        response = R.handle(handle, action.dict())
+        assert isinstance(
+            response, Response
+        ), "Please return a starlette.responses.Response"
+        return response
     return Response()
 
 

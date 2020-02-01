@@ -6,6 +6,12 @@ from starlette.testclient import TestClient
 
 from slackers.hooks import actions
 from slackers.models import SlackAction
+from slackers.registry import R
+
+
+@pytest.fixture(autouse=True)
+def reset_registry():
+    R.callbacks = {}
 
 
 @pytest.fixture
@@ -35,7 +41,7 @@ def message_action(action_defaults):
 
 
 @pytest.fixture
-def block_action(action_defaults):
+def block_actions(action_defaults):
     action_defaults.update(
         {
             "token": "TOKEN",
@@ -127,7 +133,7 @@ def post_message_actions_should_emit_callback_id_event_with_payload(
     action_payload = json.dumps(message_action)
 
     @actions.on("message_action:CALLBACK_ID")
-    def on_message_action_CALLBACK_ID(payload):
+    def on_message_action_callback_id(payload):
         specific_event_callee(payload=payload)
 
     response = client.post(
@@ -140,9 +146,9 @@ def post_message_actions_should_emit_callback_id_event_with_payload(
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_block_actions_should_emit_actions_event_with_payload(
-    mocker, client: TestClient, test_headers, block_action
+    mocker, client: TestClient, test_headers, block_actions
 ):
-    action_payload = json.dumps(block_action)
+    action_payload = json.dumps(block_actions)
     base_event_callee = mocker.Mock()
 
     @actions.on("block_actions")
@@ -154,23 +160,23 @@ def post_block_actions_should_emit_actions_event_with_payload(
     )
 
     assert HTTP_200_OK == response.status_code
-    base_event_callee.assert_called_once_with(payload=block_action)
+    base_event_callee.assert_called_once_with(payload=block_actions)
 
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_block_actions_should_emit_action_event_with_payload(
-    mocker, client: TestClient, test_headers, block_action
+    mocker, client: TestClient, test_headers, block_actions
 ):
-    action_payload = json.dumps(block_action)
+    action_payload = json.dumps(block_actions)
     specific_event_callee_1 = mocker.Mock()
     specific_event_callee_2 = mocker.Mock()
 
     @actions.on("block_actions:ACTION_ID_1")
-    def on_block_actions_ACTION_ID_1(payload):
+    def on_block_actions_action_id_1(payload):
         specific_event_callee_1(payload=payload)
 
     @actions.on("block_actions:ACTION_ID_2")
-    def on_block_actions_ACTION_ID_2(payload):
+    def on_block_actions_action_id_2(payload):
         specific_event_callee_2(payload=payload)
 
     response = client.post(
@@ -178,8 +184,8 @@ def post_block_actions_should_emit_action_event_with_payload(
     )
 
     assert HTTP_200_OK == response.status_code
-    specific_event_callee_1.assert_called_once_with(payload=block_action)
-    specific_event_callee_2.assert_called_once_with(payload=block_action)
+    specific_event_callee_1.assert_called_once_with(payload=block_actions)
+    specific_event_callee_2.assert_called_once_with(payload=block_actions)
 
 
 @pytest.mark.usefixtures("pass_header_verification")
@@ -223,6 +229,92 @@ def post_view_submission_should_emit_selected_action_event_with_payload(
 
 
 @pytest.mark.usefixtures("pass_header_verification")
+def post_block_actions_should_return_a_custom_response(
+    client: TestClient, test_headers, block_actions
+):
+    action_payload = json.dumps(block_actions)
+    from slackers.hooks import responder
+
+    @responder("block_actions:ACTION_ID_1")
+    def custom_response(actual_payload):
+        from starlette.responses import JSONResponse
+
+        assert actual_payload == block_actions
+        return JSONResponse(content={"custom": "Custom Response"})
+
+    response = client.post(
+        url="/actions", data={"payload": action_payload}, headers=test_headers
+    )
+
+    assert HTTP_200_OK == response.status_code
+    assert {"custom": "Custom Response"} == response.json()
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_view_submission_should_return_a_custom_response(
+    client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
+
+    @responder("view_submission:VIEW_CALLBACK_ID")
+    def custom_response(actual_payload):
+        from starlette.responses import JSONResponse
+
+        assert actual_payload == view_submission
+        return JSONResponse(content={"custom": "Custom Response"})
+
+    response = client.post(
+        url="/actions", data={"payload": action_payload}, headers=test_headers
+    )
+
+    assert HTTP_200_OK == response.status_code
+    assert {"custom": "Custom Response"} == response.json()
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def max_one_custom_response_should_be_possible(
+    client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
+
+    @responder("view_submission")
+    def custom_response(payload):
+        ...  # pragma: no cover, exception raised before calling function
+
+    @responder("view_submission:VIEW_CALLBACK_ID")
+    def custom_response(payload):
+        ...  # pragma: no cover, exception raised before calling function
+
+    with pytest.raises(ValueError, match="Multiple response handlers found"):
+        client.post(
+            url="/actions", data={"payload": action_payload}, headers=test_headers
+        )
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def handler_should_return_starlette_response(
+    client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
+
+    @responder("view_submission:VIEW_CALLBACK_ID")
+    def custom_response(payload):
+        from requests import Response
+
+        return Response()
+
+    with pytest.raises(
+        AssertionError, match="Please return a starlette.responses.Response"
+    ):
+        client.post(
+            url="/actions", data={"payload": action_payload}, headers=test_headers
+        )
+
+
+@pytest.mark.usefixtures("pass_header_verification")
 def post_view_closed_should_emit_closed_event(
     mocker, client: TestClient, test_headers, view_closed
 ):
@@ -243,7 +335,7 @@ def post_view_closed_should_emit_closed_event(
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_view_closed_should_emit_closed_event_callback_id(
-        mocker, client: TestClient, test_headers, view_closed
+    mocker, client: TestClient, test_headers, view_closed
 ):
     # This might be a nonexistent use case, but even so, if a callback id
     # is in a view_closed body, the callback_id event will be emitted as
