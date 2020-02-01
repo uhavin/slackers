@@ -14,6 +14,3 @@ class R:
     def handle(cls, event: str, payload: dict):
         return cls.callbacks[event](payload)
 
-    @classmethod
-    def reset(cls):
-        cls.callbacks = {}
