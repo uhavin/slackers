@@ -38,29 +38,37 @@ async def post_events(message: typing.Union[SlackEnvelope, SlackChallenge]):
 async def post_actions(request: Request) -> Response:
     form = await request.form()
     form_data = json.loads(form["payload"])
-
     # have the convenience of pydantic validation
     action = SlackAction(**form_data)
-
-    emit(actions, action.type, payload=action)
-
+    _events = [action.type]
     if action.actions:
-        for triggered_action in action.actions:
-            event_type = f"{action.type}:{triggered_action['action_id']}"
-            emit(actions, event_type, action)
+        triggered_events = [
+            f"{action.type}:{triggered_action['action_id']}"
+            for triggered_action in action.actions
+        ]
+        _events.extend(triggered_events)
     if action.callback_id:
-        event_type = f"{action.type}:{action.callback_id}"
-        emit(actions, event_type, action)
+        _events.append(f"{action.type}:{action.callback_id}")
     if action.view:
         view_callback_id = action.view.get("callback_id")
-        if not view_callback_id:
-            return
-        event_type = f"{action.type}:{view_callback_id}"
-        if event_type in R._registry:
-            return R.handle(event_type, action)
-        emit(actions, event_type, action)
+        if view_callback_id:
+            _events.append(f"{action.type}:{view_callback_id}")
 
-    return Response()
+    handle = None
+    for _event in _events:
+        if _event in R.callbacks:
+            if handle:
+                raise ValueError(f"Multiple response handlers found.")
+            handle = _event
+        emit(actions, _event, payload=action)
+
+    response = None
+    if handle:
+        response = R.handle(handle, action.dict())
+        assert isinstance(
+            response, Response
+        ), "Please return a starlette.responses.Response"
+    return response or Response()
 
 
 @router.post(

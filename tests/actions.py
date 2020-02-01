@@ -1,11 +1,18 @@
 import json
 
 import pytest
+from starlette.responses import Response
 from starlette.status import HTTP_200_OK
 from starlette.testclient import TestClient
 
 from slackers.hooks import actions
 from slackers.models import SlackAction
+from slackers.registry import R
+
+
+@pytest.fixture(autouse=True)
+def reset_registry():
+    R.reset()
 
 
 @pytest.fixture
@@ -127,7 +134,7 @@ def post_message_actions_should_emit_callback_id_event_with_payload(
     action_payload = json.dumps(message_action)
 
     @actions.on("message_action:CALLBACK_ID")
-    def on_message_action_CALLBACK_ID(payload):
+    def on_message_action_callback_id(payload):
         specific_event_callee(payload=payload)
 
     response = client.post(
@@ -166,11 +173,11 @@ def post_block_actions_should_emit_action_event_with_payload(
     specific_event_callee_2 = mocker.Mock()
 
     @actions.on("block_actions:ACTION_ID_1")
-    def on_block_actions_ACTION_ID_1(payload):
+    def on_block_actions_action_id_1(payload):
         specific_event_callee_1(payload=payload)
 
     @actions.on("block_actions:ACTION_ID_2")
-    def on_block_actions_ACTION_ID_2(payload):
+    def on_block_actions_action_id_2(payload):
         specific_event_callee_2(payload=payload)
 
     response = client.post(
@@ -224,18 +231,17 @@ def post_view_submission_should_emit_selected_action_event_with_payload(
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_view_submission_should_return_a_custom_response(
-    mocker, client: TestClient, test_headers, view_submission
+    client: TestClient, test_headers, view_submission
 ):
     action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
 
+    @responder("view_submission:VIEW_CALLBACK_ID")
     def custom_response(actual_payload):
         from starlette.responses import JSONResponse
-        assert view_submission == actual_payload
+
+        assert actual_payload == view_submission
         return JSONResponse(content={"custom": "Custom Response"})
-
-    from slackers.registry import R
-
-    R.add("view_submission:VIEW_CALLBACK_ID", custom_response)
 
     response = client.post(
         url="/actions", data={"payload": action_payload}, headers=test_headers
@@ -243,6 +249,48 @@ def post_view_submission_should_return_a_custom_response(
 
     assert HTTP_200_OK == response.status_code
     assert {"custom": "Custom Response"} == response.json()
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def max_one_custom_response_should_be_possible(
+    client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
+
+    @responder("view_submission")
+    def custom_response(payload):
+        ...  # pragma: no cover, exception raised before calling function
+
+    @responder("view_submission:VIEW_CALLBACK_ID")
+    def custom_response(payload):
+        ...  # pragma: no cover, exception raised before calling function
+
+    with pytest.raises(ValueError, match="Multiple response handlers found"):
+        client.post(
+            url="/actions", data={"payload": action_payload}, headers=test_headers
+        )
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def handler_should_return_starlette_response(
+    client: TestClient, test_headers, view_submission
+):
+    action_payload = json.dumps(view_submission)
+    from slackers.hooks import responder
+
+    @responder("view_submission:VIEW_CALLBACK_ID")
+    def custom_response(payload):
+        from requests import Response
+
+        return Response()
+
+    with pytest.raises(
+        AssertionError, match="Please return a starlette.responses.Response"
+    ):
+        client.post(
+            url="/actions", data={"payload": action_payload}, headers=test_headers
+        )
 
 
 @pytest.mark.usefixtures("pass_header_verification")

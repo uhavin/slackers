@@ -4,12 +4,16 @@ from starlette.responses import Response
 
 
 class R:
-    _registry = dict()
+    callbacks = dict()
 
     @classmethod
     def add(cls, event, handler: typing.Callable[[dict], Response]):
-        cls._registry[event] = handler
+        cls.callbacks[event] = handler
 
     @classmethod
-    def handle(cls, event, payload):
-        return cls._registry[event](payload)
+    def handle(cls, event: str, payload: dict):
+        return cls.callbacks[event](payload)
+
+    @classmethod
+    def reset(cls):
+        cls.callbacks = {}
