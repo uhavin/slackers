@@ -54,21 +54,23 @@ async def post_actions(request: Request) -> Response:
         if view_callback_id:
             _events.append(f"{action.type}:{view_callback_id}")
 
-    handle = None
     for _event in _events:
-        if _event in R.callbacks:
-            if handle:
-                raise ValueError(f"Multiple response handlers found.")
-            handle = _event
         emit(actions, _event, payload=action)
 
-    response = None
-    if handle:
+    registered_handlers = set(R.callbacks.keys())
+    registered_events = set(_events)
+    handlers_to_call = registered_handlers.intersection(registered_events)
+    if len(handlers_to_call) > 1:
+        raise ValueError(f"Multiple response handlers found.")
+
+    if handlers_to_call:
+        handle = handlers_to_call.pop()
         response = R.handle(handle, action.dict())
         assert isinstance(
             response, Response
         ), "Please return a starlette.responses.Response"
-    return response or Response()
+        return response
+    return Response()
 
 
 @router.post(
