@@ -44,7 +44,6 @@ class SlackAction(SlackBase):
 
 
 class SlackCommand(SlackBase):
-    user_id: str
     command: str
     response_url: str
     trigger_id: str
