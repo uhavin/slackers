@@ -2,3 +2,4 @@
 .eggs
 .coverage
 *.egg-info/
+.tox

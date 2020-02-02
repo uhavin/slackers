@@ -33,6 +33,7 @@ uvicorn=["uvicorn"]
 pytest = "^5.2"
 pytest-cov = "^2.8"
 pytest-mock = "^1.11"
+tox = "^3.14.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
