@@ -1,4 +1,7 @@
 # Slackers change log
+## 0.4.2 - 2020-02-02
+### Added
+- Tox as develop dependency. Upgrade package versions.
 
 ## 0.4.1 - 2020-02-02
 ### Fixed
