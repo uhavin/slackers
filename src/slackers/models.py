@@ -51,3 +51,4 @@ class SlackCommand(SlackBase):
     user_name: str
     team_id: str
     channel_id: str
+    text: str
