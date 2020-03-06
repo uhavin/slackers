@@ -1,4 +1,7 @@
 # Slackers change log
+## 0.4.3 - 2020-03-06
+- Add text to command model.
+
 ## 0.4.2 - 2020-02-02
 ### Added
 - Tox as develop dependency. Upgrade package versions.
