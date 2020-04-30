@@ -1,6 +1,11 @@
 # Slackers change log
+
+## 0.4.4 - 2020-04-30
+### Fixed
+- Allow authed_users of events to be empty (@GH-maggio)
+
 ## 0.4.3 - 2020-03-06
-- Add text to command model.
+- Add text to command model (@kylecrawshaw)
 
 ## 0.4.2 - 2020-02-02
 ### Added
