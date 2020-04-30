@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -17,7 +17,7 @@ class SlackEnvelope(SlackBase):
     api_app_id: str
     event: dict
     type: str
-    authed_users: List[str]
+    authed_users: Optional[List[str]]
     event_id: str
     event_time: int
 
