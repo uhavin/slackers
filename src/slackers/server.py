@@ -40,7 +40,6 @@ async def post_actions(request: Request) -> Response:
     form_data = json.loads(form["payload"])
 
     # have the convenience of pydantic validation
-    print(form_data)
     action = SlackAction(**form_data)
     _events = [action.type]
     if action.actions:
