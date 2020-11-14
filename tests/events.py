@@ -55,7 +55,7 @@ def post_events_should_emit_events_event_with_payload(
 
 @pytest.mark.usefixtures("pass_header_verification")
 def post_events_should_accept_envelope_without_authed_users(
-        mocker, client: TestClient, test_headers
+    mocker, client: TestClient, test_headers
 ):
     slack_envelope = {
         "token": "TOKEN",
@@ -74,6 +74,7 @@ def post_events_should_accept_envelope_without_authed_users(
     @events.on("foo")
     def on_foo(payload):
         import json
+
         print(json.dumps(payload))
         inspection(payload=payload)
 

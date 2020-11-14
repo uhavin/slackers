@@ -41,6 +41,20 @@ def message_action(action_defaults):
 
 
 @pytest.fixture
+def interactive_message(message_action):
+    message_action.update(
+        {
+            "type": "interactive_message",
+            "actions": [
+                {"name": "ACTION_1_NAME", "type": "ACTION_1_TYPE"},
+                {"name": "ACTION_2_NAME", "type": "ACTION_2_TYPE"},
+            ],
+        }
+    )
+    return message_action
+
+
+@pytest.fixture
 def block_actions(action_defaults):
     action_defaults.update(
         {
@@ -244,6 +258,134 @@ def post_block_actions_should_return_a_custom_response(
 
     response = client.post(
         url="/actions", data={"payload": action_payload}, headers=test_headers
+    )
+
+    assert HTTP_200_OK == response.status_code
+    assert {"custom": "Custom Response"} == response.json()
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_interactive_message_should_emit_interactive_message_event_with_payload(
+    mocker, client: TestClient, test_headers, interactive_message
+):
+    interactive_message_payload = json.dumps(interactive_message)
+    base_event_callee = mocker.Mock()
+
+    @actions.on("interactive_message")
+    def on_foo(payload):
+        base_event_callee(payload=payload)
+
+    response = client.post(
+        url="/actions",
+        data={"payload": interactive_message_payload},
+        headers=test_headers,
+    )
+
+    assert HTTP_200_OK == response.status_code
+    base_event_callee.assert_called_once_with(payload=interactive_message)
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_interactive_message_should_emit_interactive_message_event_names_with_payload(
+    mocker, client: TestClient, test_headers, interactive_message
+):
+    interactive_message_payload = json.dumps(interactive_message)
+    base_event_callee_1 = mocker.Mock()
+    base_event_callee_2 = mocker.Mock()
+
+    @actions.on("interactive_message:ACTION_1_NAME")
+    def on_foo(payload):
+        base_event_callee_1(payload=payload)
+
+    @actions.on("interactive_message:ACTION_2_NAME")
+    def on_foo(payload):
+        base_event_callee_2(payload=payload)
+
+    response = client.post(
+        url="/actions",
+        data={"payload": interactive_message_payload},
+        headers=test_headers,
+    )
+
+    assert HTTP_200_OK == response.status_code
+    base_event_callee_1.assert_called_once_with(payload=interactive_message)
+    base_event_callee_2.assert_called_once_with(payload=interactive_message)
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_interactive_message_should_emit_interactive_message_event_types_with_payload(
+    mocker, client: TestClient, test_headers, interactive_message
+):
+    interactive_message_payload = json.dumps(interactive_message)
+    base_event_callee_1 = mocker.Mock()
+    base_event_callee_2 = mocker.Mock()
+
+    @actions.on("interactive_message:ACTION_1_TYPE")
+    def on_foo(payload):
+        base_event_callee_1(payload=payload)
+
+    @actions.on("interactive_message:ACTION_2_TYPE")
+    def on_foo(payload):
+        base_event_callee_2(payload=payload)
+
+    response = client.post(
+        url="/actions",
+        data={"payload": interactive_message_payload},
+        headers=test_headers,
+    )
+
+    assert HTTP_200_OK == response.status_code
+    base_event_callee_1.assert_called_once_with(payload=interactive_message)
+    base_event_callee_2.assert_called_once_with(payload=interactive_message)
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_interactive_message_should_emit_interactive_message_event_name_type_combo_with_payload(
+    mocker, client: TestClient, test_headers, interactive_message
+):
+    interactive_message_payload = json.dumps(interactive_message)
+    base_event_callee_1 = mocker.Mock()
+    base_event_callee_2 = mocker.Mock()
+
+    @actions.on("interactive_message:ACTION_1_NAME:ACTION_1_TYPE")
+    def on_foo(payload):
+        base_event_callee_1(payload=payload)
+
+    @actions.on("interactive_message:ACTION_2_NAME:ACTION_2_TYPE")
+    def on_foo(payload):
+        base_event_callee_2(payload=payload)
+
+    response = client.post(
+        url="/actions",
+        data={"payload": interactive_message_payload},
+        headers=test_headers,
+    )
+
+    assert HTTP_200_OK == response.status_code
+    base_event_callee_1.assert_called_once_with(payload=interactive_message)
+    base_event_callee_2.assert_called_once_with(payload=interactive_message)
+
+
+@pytest.mark.usefixtures("pass_header_verification")
+def post_interactive_message_should_be_able_to_return_custom_response(
+    client: TestClient, test_headers, interactive_message
+):
+
+    from slackers.hooks import responder
+
+    interactive_message_payload = json.dumps(interactive_message)
+
+    @responder("interactive_message")
+    def custom_response(actual_payload):
+        from starlette.responses import JSONResponse
+
+        assert actual_payload == interactive_message
+        return JSONResponse(content={"custom": "Custom Response"})
+
+    response = client.post(
+        url="/actions",
+        data={"payload": interactive_message_payload},
+        headers=test_headers,
     )
 
     assert HTTP_200_OK == response.status_code
