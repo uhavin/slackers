@@ -39,14 +39,11 @@ async def post_actions(request: Request) -> Response:
     form = await request.form()
     form_data = json.loads(form["payload"])
     # have the convenience of pydantic validation
+    print(form_data)
     action = SlackAction(**form_data)
     _events = [action.type]
     if action.actions:
-        triggered_events = [
-            f"{action.type}:{triggered_action['action_id']}"
-            for triggered_action in action.actions
-        ]
-        _events.extend(triggered_events)
+        _events.extend(_add_action_triggers(action))
     if action.callback_id:
         _events.append(f"{action.type}:{action.callback_id}")
     if action.view:
@@ -71,6 +68,37 @@ async def post_actions(request: Request) -> Response:
         ), "Please return a starlette.responses.Response"
         return response
     return Response()
+
+
+def _add_action_triggers(action: SlackAction) -> list:
+    gathered_events = [
+        f"{action.type}:{triggered_action['action_id']}"
+        for triggered_action in action.actions
+        if "action_id" in triggered_action
+    ]
+    gathered_events.extend(
+        [
+            f"{action.type}:{triggered_action['name']}"
+            for triggered_action in action.actions
+            if "name" in triggered_action
+        ]
+    )
+    gathered_events.extend(
+        [
+            f"{action.type}:{triggered_action['type']}"
+            for triggered_action in action.actions
+            if "type" in triggered_action
+        ]
+    )
+    gathered_events.extend(
+        [
+            f"{action.type}:{triggered_action['name']}:{triggered_action['type']}"
+            for triggered_action in action.actions
+            if "name" in triggered_action and "type" in triggered_action
+        ]
+    )
+
+    return gathered_events
 
 
 @router.post(

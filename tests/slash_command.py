@@ -24,7 +24,7 @@ def post_commands_should_emit_commands_event_with_payload(
         "user_name": "USER_NAME",
         "team_id": "TEAM_ID",
         "channel_id": "CHANNEL_ID",
-        "text": "hello from slack"
+        "text": "hello from slack",
     }
 
     response = client.post(url="/commands", data=command, headers=test_headers)

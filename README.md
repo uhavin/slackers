@@ -102,6 +102,41 @@ def handle_action_by_callback_id(payload):
     log.debug(payload)
 ```
 
+#### Interactive messages
+Interactive message actions do not have an `action_id`. They do have a `name` and a `type`. 
+To act upon interactive messages, you can listen for the action type, `interactive_message`
+as wel as the combination of the `interactive_message` and `name`, `type` or both.
+```python
+import logging
+from slackers.hooks import actions
+
+log = logging.getLogger(__name__)
+
+# Listening for the action type.
+@actions.on("interactive_message")
+def handle_action(payload):
+    log.info("Action started.")
+    log.debug(payload)
+
+# Listen for an action by it's name
+@actions.on("interactive_message:action_name")
+def handle_action_by_id(payload):
+    log.info("Action started.")
+    log.debug(payload)
+
+# Listen for an action by it's type
+@actions.on("interactive_message:action_type")
+def handle_action_by_callback_id(payload):
+    log.info(f"Action started.")
+    log.debug(payload)
+
+# Listen for an action by it's name and type
+@actions.on("interactive_message:action_name:action_type")
+def handle_action_by_callback_id(payload):
+    log.info(f"Action started.")
+    log.debug(payload)
+```
+
 #### Custom responses
 Slackers tries to be fast to respond to Slack. The events you are listening for with the
 likes of `@actions.on(...)` are scheduled as an async task in a fire and forget fashion.
