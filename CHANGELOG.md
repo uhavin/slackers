@@ -1,5 +1,10 @@
 # Slackers change log
 
+## 1.0.0
+### Added
+- Add specific event emission for interactive messages.
+- Support python 3.9.
+
 ## 0.4.4 - 2020-04-30
 ### Fixed
 - Allow authed_users of events to be empty (@GH-maggio)
