@@ -1,0 +1,19 @@
+{
+    "configurations": {
+        "debug-pytest": {
+            "adapter": "debugpy",
+            "configuration": {
+                "type": "python",
+                "request": "launch",
+                "module": "pytest",
+                "args": ["--no-cov"],
+                "stopOnEntry": false,
+                "cwd": "${workspaceRoot}",
+                "python": "/home/niels/.pyenv/shims/python",
+                "env": {"PYTHONPATH": "${workspaceRoot}/src"},
+                "console": "externalTerminal",
+                "debugOptions": []
+            }
+        }
+    }
+}
