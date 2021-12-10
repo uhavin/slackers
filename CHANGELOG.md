@@ -1,4 +1,7 @@
 # Slackers change log
+## 1.0.1
+### Added
+- Add empty py.typed file to show module supports PEP 561 (@Tenzer)
 
 ## 1.0.0
 ### Added
