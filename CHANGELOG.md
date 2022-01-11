@@ -1,4 +1,8 @@
 # Slackers change log
+## 1.0.2
+### Added
+- Add python 3.10 test environment.
+
 ## 1.0.1
 ### Added
 - Add empty py.typed file to show module supports PEP 561 (@Tenzer)
