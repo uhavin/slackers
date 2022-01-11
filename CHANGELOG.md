@@ -1,6 +1,7 @@
 # Slackers change log
 ## 1.0.2
 ### Added
+- Update python dependencies.
 - Add python 3.10 test environment.
 
 ## 1.0.1
