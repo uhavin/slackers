@@ -8,6 +8,12 @@ It serves endpoints to receive [slash commands](https://api.slack.com/interactiv
 [app actions](https://api.slack.com/interactivity/actions), [interactive components](https://api.slack.com/interactivity/components). 
 It also listens for events sent to the Slack Events API [Slack Events](https://api.slack.com/events-api). 
 
+### Low maintenance
+:warning: This repository is in low maintenance mode. I have not used Slack for a few years
+and while I am willing to perform the occasional chores like dependency updates,
+it is unlikely that I will be adding features. Also, I am no longer actively using
+Slackers myself.
+
 ## Installation
 You can install Slackers with pip
 `$ pip install slackers`
