@@ -1,4 +1,11 @@
 # Slackers change log
+## 1.0.3
+### Added
+- Update dependencies.
+- Add python 3.11 to test environments.
+
+### Removed
+- Removed python 3.6 from test environments.
 ## 1.0.2
 ### Added
 - Update python dependencies.
