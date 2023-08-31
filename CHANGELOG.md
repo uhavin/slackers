@@ -1,4 +1,9 @@
 # Slackers change log
+
+## 1.0.4
+### Fixed
+- Updated Pydantic model `SlackEnvelope` due to Slack side change
+
 ## 1.0.3
 ### Added
 - Update dependencies.
