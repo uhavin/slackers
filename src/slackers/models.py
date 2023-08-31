@@ -13,13 +13,18 @@ class SlackChallenge(SlackBase):
 
 
 class SlackEnvelope(SlackBase):
+    class Config:
+        extra = "allow"
+        
     team_id: str
     api_app_id: str
     event: dict
     type: str
-    authed_users: Optional[List[str]]
     event_id: str
     event_time: int
+    authorizations: Optional[List[dict]]
+    is_ext_shared_channel: Optional[bool]
+    event_context: Optional[str]
 
 
 class SlackAction(SlackBase):
